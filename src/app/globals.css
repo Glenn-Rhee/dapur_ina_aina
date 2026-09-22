@@ -1,26 +1,269 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@custom-variant dark (&:is(.dark *));
 
 @theme inline {
-  --color-background: var(--background);
+  --font-heading: var(--font-poppins);
+  --font-poppins: var(--font-poppins);
+
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-background: var(--background);
+
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+:root {
+  /* =========================
+     BASE
+     ========================= */
+
+  --background: oklch(0.993 0.008 85);
+  --foreground: oklch(0.275 0.025 195);
+
+  /* =========================
+     CARD
+     ========================= */
+
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.275 0.025 195);
+
+  /* =========================
+     POPOVER
+     ========================= */
+
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.275 0.025 195);
+
+  /* =========================
+     PRIMARY
+     Orange #E85D04
+     ========================= */
+
+  --primary: oklch(0.565 0.195 48);
+  --primary-foreground: oklch(1 0 0);
+
+  /* =========================
+     SECONDARY
+     Teal #2A9D8F
+     ========================= */
+
+  --secondary: oklch(0.615 0.115 175);
+  --secondary-foreground: oklch(1 0 0);
+
+  /* =========================
+     MUTED
+     ========================= */
+
+  --muted: oklch(0.965 0.006 85);
+  --muted-foreground: oklch(0.52 0.02 195);
+
+  /* =========================
+     ACCENT
+     ========================= */
+
+  --accent: oklch(0.93 0.055 175);
+  --accent-foreground: oklch(0.275 0.025 195);
+
+  /* =========================
+     DESTRUCTIVE
+     ========================= */
+
+  --destructive: oklch(0.58 0.22 27);
+
+  /* =========================
+     BORDER / INPUT
+     ========================= */
+
+  --border: oklch(0.91 0.008 195);
+  --input: oklch(0.91 0.008 195);
+
+  /* =========================
+     RING
+     ========================= */
+
+  --ring: oklch(0.565 0.195 48);
+
+  /* =========================
+     CHART
+     ========================= */
+
+  --chart-1: oklch(0.565 0.195 48);   /* Orange */
+  --chart-2: oklch(0.615 0.115 175);  /* Teal */
+  --chart-3: oklch(0.72 0.15 85);     /* Amber */
+  --chart-4: oklch(0.58 0.22 27);      /* Red */
+  --chart-5: oklch(0.45 0.08 195);    /* Dark Teal */
+
+  --radius: 0.625rem;
+
+  /* =========================
+     SIDEBAR
+     ========================= */
+
+  --sidebar: oklch(0.98 0.008 85);
+  --sidebar-foreground: oklch(0.275 0.025 195);
+
+  --sidebar-primary: oklch(0.565 0.195 48);
+  --sidebar-primary-foreground: oklch(1 0 0);
+
+  --sidebar-accent: oklch(0.93 0.055 175);
+  --sidebar-accent-foreground: oklch(0.275 0.025 195);
+
+  --sidebar-border: oklch(0.91 0.008 195);
+  --sidebar-ring: oklch(0.565 0.195 48);
+}
+
+.dark {
+  /* =========================
+     BASE
+     ========================= */
+
+  --background: oklch(0.17 0.02 195);
+  --foreground: oklch(0.97 0.008 85);
+
+  /* =========================
+     CARD
+     ========================= */
+
+  --card: oklch(0.21 0.025 195);
+  --card-foreground: oklch(0.97 0.008 85);
+
+  /* =========================
+     POPOVER
+     ========================= */
+
+  --popover: oklch(0.21 0.025 195);
+  --popover-foreground: oklch(0.97 0.008 85);
+
+  /* =========================
+     PRIMARY
+     ========================= */
+
+  --primary: oklch(0.65 0.19 48);
+  --primary-foreground: oklch(1 0 0);
+
+  /* =========================
+     SECONDARY
+     ========================= */
+
+  --secondary: oklch(0.65 0.12 175);
+  --secondary-foreground: oklch(1 0 0);
+
+  /* =========================
+     MUTED
+     ========================= */
+
+  --muted: oklch(0.25 0.025 195);
+  --muted-foreground: oklch(0.72 0.015 195);
+
+  /* =========================
+     ACCENT
+     ========================= */
+
+  --accent: oklch(0.3 0.045 175);
+  --accent-foreground: oklch(0.97 0.008 85);
+
+  /* =========================
+     DESTRUCTIVE
+     ========================= */
+
+  --destructive: oklch(0.7 0.19 27);
+
+  /* =========================
+     BORDER / INPUT
+     ========================= */
+
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+
+  /* =========================
+     RING
+     ========================= */
+
+  --ring: oklch(0.65 0.19 48);
+
+  /* =========================
+     CHART
+     ========================= */
+
+  --chart-1: oklch(0.65 0.19 48);
+  --chart-2: oklch(0.65 0.12 175);
+  --chart-3: oklch(0.75 0.15 85);
+  --chart-4: oklch(0.7 0.19 27);
+  --chart-5: oklch(0.7 0.08 195);
+
+  /* =========================
+     SIDEBAR
+     ========================= */
+
+  --sidebar: oklch(0.19 0.025 195);
+  --sidebar-foreground: oklch(0.97 0.008 85);
+
+  --sidebar-primary: oklch(0.65 0.19 48);
+  --sidebar-primary-foreground: oklch(1 0 0);
+
+  --sidebar-accent: oklch(0.27 0.04 175);
+  --sidebar-accent-foreground: oklch(0.97 0.008 85);
+
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: oklch(0.65 0.19 48);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
   }
-}
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  body {
+    @apply bg-background text-foreground;
+  }
+
+  html {
+    @apply font-sans;
+  }
 }

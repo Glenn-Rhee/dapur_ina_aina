@@ -1,36 +1,94 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Dapur Ina Aina
 
-## Getting Started
+Website pemesanan makanan online untuk Toko Dapur Ina Aina — dibangun sesuai rancangan pada
+**Tugas LSP 1** (use case, activity diagram, class diagram, design system) dan
+**Tugas LSP 2** (rancangan database).
 
-First, run the development server:
+## Stack
+
+- **Next.js 16** (App Router) + **TypeScript**
+- **Tailwind CSS v4** + **shadcn/ui** (komponen ditulis manual sesuai `globals.css` yang diberikan)
+- **Supabase** (PostgreSQL, Auth, Storage) via `@supabase/ssr`
+- **Zod** untuk validasi, **Recharts** untuk grafik laporan, **Sonner** untuk notifikasi
+
+## Fitur
+
+**Pelanggan** (route `(customer)`, wajib login): melihat menu & detail, mencari/filter kategori,
+keranjang belanja (localStorage, disinkronkan ke stok terbaru), checkout dengan pembayaran
+Tunai/Non-tunai, melihat pesanan aktif & riwayat, membatalkan pesanan yang masih menunggu.
+
+**Admin** (route `/admin`, wajib role `ADMIN`): dashboard ringkasan, kelola kategori, kelola menu
+(termasuk unggah foto ke Supabase Storage), kelola stok (stok masuk/keluar), kelola transaksi
+(ubah status pesanan & pembayaran), laporan penjualan (mingguan/bulanan/tahunan + menu terlaris).
+
+Semua aturan bisnis penting (potong stok, hitung total, validasi status) dijalankan di **database**
+lewat PostgreSQL function (`supabase/schema.sql`), dilindungi oleh **Row Level Security**, agar
+konsisten dan aman dipanggil langsung dari browser.
+
+## Menjalankan proyek
+
+### 1. Install dependency
+
+```bash
+npm install
+```
+
+### 2. Siapkan project Supabase
+
+1. Buat project baru di [supabase.com](https://supabase.com).
+2. Buka **SQL Editor** → tempel seluruh isi `supabase/schema.sql` → **Run**.
+   Script ini membuat semua tabel, function, RLS, bucket foto menu, dan beberapa data menu contoh.
+3. Buka **Project Settings → API** (atau tombol **Connect**), salin **Project URL** dan
+   **anon / publishable key**.
+
+### 3. Konfigurasi environment
+
+```bash
+cp .env.example .env.local
+```
+
+Isi `.env.local` dengan URL dan key dari langkah sebelumnya.
+
+### 4. Jalankan aplikasi
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Buka [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 5. Membuat akun admin
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+1. Daftar akun baru lewat halaman `/register` di aplikasi (akun baru selalu berperan `USER`).
+2. Di **SQL Editor** Supabase, jalankan:
+   ```sql
+   update public.users set role = 'ADMIN' where email = 'email_anda@contoh.com';
+   ```
+3. Login ulang — Anda akan diarahkan ke `/admin`.
 
-## Learn More
+## Struktur folder penting
 
-To learn more about Next.js, take a look at the following resources:
+```
+src/
+  app/
+    (auth)/login, (auth)/register     # halaman publik
+    (customer)/menu, cart, checkout,  # halaman pelanggan (wajib login)
+    orders
+    admin/...                         # halaman admin (wajib role ADMIN)
+  actions/        # Server Actions (auth, orders, admin)
+  components/     # UI (shadcn) + komponen fitur
+  hooks/          # useCart, useCartSync
+  lib/            # supabase client/server/proxy, format, validasi, auth helper
+  proxy.ts        # proxy Next.js: refresh sesi + proteksi rute
+supabase/
+  schema.sql      # skema database lengkap, siap dijalankan di Supabase SQL Editor
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Catatan
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Kolom `password` pada tabel `public.users` (sesuai rancangan class diagram) berisi salinan hash
+  bcrypt dari Supabase Auth, bukan password asli, dan **tidak bisa dibaca lewat API**
+  (lihat bagian `GRANT`/`REVOKE` di `schema.sql`).
+- Harga & ketersediaan stok **selalu dihitung ulang di database** saat pesanan dibuat
+  (function `create_order`), sehingga aman dari manipulasi harga di sisi klien.
+- Script `schema.sql` aman dijalankan berulang kali (idempotent) dan tidak akan menghapus data yang sudah ada.
