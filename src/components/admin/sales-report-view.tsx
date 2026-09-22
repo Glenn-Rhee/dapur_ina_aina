@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useTransition } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
 import {
   Bar,
   BarChart,
@@ -10,14 +10,17 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { BarChart3Icon } from "lucide-react";
+import { BarChart3Icon, RotateCcwIcon } from "lucide-react";
 
 import { EmptyState } from "@/components/layout/empty-state";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { createClient } from "@/lib/supabase/client";
-import { formatDate, formatRupiah } from "@/lib/format";
+import { formatDate, formatRupiah, todayJakarta } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import type { SalesReport } from "@/types";
 
@@ -40,34 +43,126 @@ function bucketLabel(bucket: string, period: SalesReport["period"]) {
   return new Intl.DateTimeFormat("id-ID", { day: "numeric", month: "short" }).format(d);
 }
 
+const todayStr = todayJakarta();
+const todayMonth = todayStr.slice(0, 7); // YYYY-MM
+const todayYear = Number(todayStr.slice(0, 4));
+
 export function SalesReportView() {
   const [period, setPeriod] = useState<SalesReport["period"]>("weekly");
+
+  // Nilai yang dipilih admin untuk masing-masing jenis periode (disimpan terpisah
+  // agar berpindah tab periode tidak menghilangkan pilihan tanggal sebelumnya).
+  const [pickedDate, setPickedDate] = useState(todayStr); // untuk mingguan
+  const [pickedMonth, setPickedMonth] = useState(todayMonth); // untuk bulanan
+  const [pickedYear, setPickedYear] = useState(todayYear); // untuk tahunan
+
   const [report, setReport] = useState<SalesReport | null>(null);
   const [pending, startTransition] = useTransition();
+
+  const pDate = useMemo(() => {
+    if (period === "weekly") return pickedDate;
+    if (period === "monthly") return `${pickedMonth}-01`;
+    return `${pickedYear}-01-01`;
+  }, [period, pickedDate, pickedMonth, pickedYear]);
+
+  const isDefault =
+    (period === "weekly" && pickedDate === todayStr) ||
+    (period === "monthly" && pickedMonth === todayMonth) ||
+    (period === "yearly" && pickedYear === todayYear);
 
   useEffect(() => {
     startTransition(async () => {
       const supabase = createClient();
-      const { data, error } = await supabase.rpc("get_sales_report", { p_period: period, p_date: null });
+      const { data, error } = await supabase.rpc("get_sales_report", { p_period: period, p_date: pDate });
       if (!error && data) setReport(data as SalesReport);
     });
-  }, [period]);
+  }, [period, pDate]);
 
   const chartData = report?.series.map((s) => ({ ...s, label: bucketLabel(s.bucket, report.period) })) ?? [];
 
+  const years = Array.from({ length: 6 }, (_, i) => todayYear - i);
+
+  function resetToToday() {
+    setPickedDate(todayStr);
+    setPickedMonth(todayMonth);
+    setPickedYear(todayYear);
+  }
+
   return (
     <div className="grid gap-6">
-      <div className="flex flex-wrap gap-2">
-        {PERIODS.map((p) => (
-          <Button
-            key={p.key}
-            size="sm"
-            variant={period === p.key ? "default" : "outline"}
-            onClick={() => setPeriod(p.key)}
-          >
-            {p.label}
-          </Button>
-        ))}
+      <div className="flex flex-wrap items-end justify-between gap-3 rounded-xl border bg-card p-4">
+        <div className="flex flex-wrap gap-2">
+          {PERIODS.map((p) => (
+            <Button
+              key={p.key}
+              size="sm"
+              variant={period === p.key ? "default" : "outline"}
+              onClick={() => setPeriod(p.key)}
+            >
+              {p.label}
+            </Button>
+          ))}
+        </div>
+
+        <div className="flex flex-wrap items-end gap-3">
+          {period === "weekly" && (
+            <div className="grid gap-1.5">
+              <Label htmlFor="r-week" className="text-xs text-muted-foreground">
+                Pilih tanggal dalam minggu
+              </Label>
+              <Input
+                id="r-week"
+                type="date"
+                max={todayStr}
+                value={pickedDate}
+                onChange={(e) => e.target.value && setPickedDate(e.target.value)}
+                className="w-44"
+              />
+            </div>
+          )}
+
+          {period === "monthly" && (
+            <div className="grid gap-1.5">
+              <Label htmlFor="r-month" className="text-xs text-muted-foreground">
+                Pilih bulan
+              </Label>
+              <Input
+                id="r-month"
+                type="month"
+                max={todayMonth}
+                value={pickedMonth}
+                onChange={(e) => e.target.value && setPickedMonth(e.target.value)}
+                className="w-40"
+              />
+            </div>
+          )}
+
+          {period === "yearly" && (
+            <div className="grid gap-1.5">
+              <Label htmlFor="r-year" className="text-xs text-muted-foreground">
+                Pilih tahun
+              </Label>
+              <Select value={String(pickedYear)} onValueChange={(v) => setPickedYear(Number(v))}>
+                <SelectTrigger id="r-year" className="w-32">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {years.map((y) => (
+                    <SelectItem key={y} value={String(y)}>
+                      {y}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+
+          {!isDefault && (
+            <Button variant="ghost" size="sm" onClick={resetToToday}>
+              <RotateCcwIcon /> Sekarang
+            </Button>
+          )}
+        </div>
       </div>
 
       {pending || !report ? (

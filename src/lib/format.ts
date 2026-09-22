@@ -36,6 +36,26 @@ export function todayJakarta() {
   return new Intl.DateTimeFormat("en-CA", { timeZone: TZ }).format(new Date());
 }
 
+/** Tanggal N hari sebelum hari ini (zona Asia/Jakarta), format YYYY-MM-DD. */
+export function daysAgoJakarta(days: number) {
+  const d = new Date();
+  d.setUTCDate(d.getUTCDate() - days);
+  return new Intl.DateTimeFormat("en-CA", { timeZone: TZ }).format(d);
+}
+
+/** Ubah tanggal (YYYY-MM-DD) menjadi awal/akhir hari WIB dalam ISO (untuk filter timestamptz). */
+export function jakartaDayStart(date: string) {
+  return `${date}T00:00:00+07:00`;
+}
+export function jakartaDayEnd(date: string) {
+  return `${date}T23:59:59+07:00`;
+}
+
+/** Validasi sederhana format YYYY-MM-DD. */
+export function isValidDateStr(value: string | undefined | null): value is string {
+  return Boolean(value && /^\d{4}-\d{2}-\d{2}$/.test(value) && !Number.isNaN(Date.parse(value)));
+}
+
 /** Kode pesanan yang mudah dibaca, contoh: DIA-1A2B3C4D */
 export function orderCode(id: string) {
   return `DIA-${id.slice(0, 8).toUpperCase()}`;
