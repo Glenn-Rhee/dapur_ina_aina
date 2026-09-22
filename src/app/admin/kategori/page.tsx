@@ -1,7 +1,5 @@
 import type { Metadata } from "next";
 import { TagsIcon } from "lucide-react";
-
-import { deleteCategory } from "@/actions/admin";
 import { CategoryFormDialog } from "@/components/admin/category-form-dialog";
 import { ConfirmDeleteButton } from "@/components/admin/confirm-delete-button";
 import { EmptyState } from "@/components/layout/empty-state";

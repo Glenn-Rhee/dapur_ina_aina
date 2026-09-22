@@ -3,7 +3,6 @@
 import { useMemo, useState } from "react";
 import { SearchIcon, SearchXIcon, XIcon } from "lucide-react";
 
-import { deleteProduct } from "@/actions/admin";
 import { ConfirmDeleteButton } from "@/components/admin/confirm-delete-button";
 import { ProductActiveSwitch } from "@/components/admin/product-active-switch";
 import { ProductFormDialog } from "@/components/admin/product-form-dialog";
@@ -217,7 +216,8 @@ export function MenuTable({
                         <ConfirmDeleteButton
                           title={`Hapus "${p.name}"?`}
                           description="Menu yang sudah pernah dipesan tidak dapat dihapus; nonaktifkan saja."
-                          onConfirm={() => deleteProduct(p.id)}
+                          usedFor="product"
+                          id={p.id}
                         />
                       </div>
                     </TableCell>

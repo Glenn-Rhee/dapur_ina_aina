@@ -2,8 +2,6 @@
 import { useState, useTransition } from "react";
 import { LoaderCircleIcon, Trash2Icon } from "lucide-react";
 import { toast } from "sonner";
-
-import type { SimpleResult } from "@/actions/orders";
 import {
   AlertDialog,
   AlertDialogCancel,
